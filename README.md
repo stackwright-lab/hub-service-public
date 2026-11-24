@@ -238,7 +238,7 @@ Le hub complète le MCP officiel de data.gouv.fr (`https://mcp.data.gouv.fr/mcp`
 
 ## Licence
 
-Copyright (c) 2026 QXScale. Code distribué sous la **Licence publique de l'Union européenne (EUPL) v. 1.2** (voir `LICENSE`).
+Copyright (c) 2026 QXScale. Code distribué sous la **Licence publique de l'Union européenne (EUPL) v. 1.2** (voir `LICENSE` et `NOTICE`).
 
 En pratique : vous pouvez installer, utiliser, étudier, modifier et redistribuer ce logiciel, y compris dans un cadre professionnel. Si vous diffusez une version modifiée, ou si vous la proposez à d'autres comme service en ligne, vous devez publier son code source sous la même licence et conserver la mention de copyright. Le logiciel est fourni sans garantie. Ce résumé ne remplace pas le texte de la licence.
 
