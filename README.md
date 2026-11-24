@@ -5,6 +5,7 @@
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-16348f)
 ![Serveur MCP](https://img.shields.io/badge/MCP-compatible-16348f)
 ![Open data](https://img.shields.io/badge/donn%C3%A9es-data.gouv.fr%20%C2%B7%20ADEME%20%C2%B7%20BAN-16348f)
+[![stackwright-lab/hub-service-public MCP server](https://glama.ai/mcp/servers/stackwright-lab/hub-service-public/badges/score.svg)](https://glama.ai/mcp/servers/stackwright-lab/hub-service-public)
 
 Une page web où vous posez une question en français : le hub va chercher la réponse dans les données publiques françaises et cite ses sources.
 
