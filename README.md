@@ -1,5 +1,11 @@
 # Hub Service Public
 
+[![Tests](https://github.com/stackwright-lab/hub-service-public/actions/workflows/ci.yml/badge.svg)](https://github.com/stackwright-lab/hub-service-public/actions/workflows/ci.yml)
+[![Licence EUPL-1.2](https://img.shields.io/badge/licence-EUPL--1.2-16348f)](LICENSE)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-16348f)
+![Serveur MCP](https://img.shields.io/badge/MCP-compatible-16348f)
+![Open data](https://img.shields.io/badge/donn%C3%A9es-data.gouv.fr%20%C2%B7%20ADEME%20%C2%B7%20BAN-16348f)
+
 Une page web où vous posez une question en français : le hub va chercher la réponse dans les données publiques françaises et cite ses sources.
 
 « Quel est le DPE du 10 rue de Rivoli à Paris ? », « Quelle est la qualité de l'air à Lyon cette semaine ? », « Quelle API publique permet de vérifier un SIRET ? ». Au lieu de fouiller data.gouv.fr, de télécharger des CSV de plusieurs gigaoctets et de lire des documentations d'API, vous posez la question et vous obtenez la réponse avec le nom du jeu de données, son producteur et sa date. Un second onglet montre la santé des données et l'état de chaque source.
@@ -9,6 +15,14 @@ Le hub tourne sur votre machine, en lecture seule. Il fonctionne sans compte ni 
 ![La page du hub : une question en français, une réponse sourcée](docs/images/hub-reponse.jpg)
 
 *Une question, une réponse qui cite le jeu de données et son producteur. Illustration construite à partir des vraies données Atmo du 20 novembre 2026.*
+
+> **In English.** Hub Service Public lets anyone ask questions in plain French about French public data and get sourced answers. It indexes the whole data.gouv.fr catalogue (75,000 datasets, 1,270 APIs) locally, reads tabular files and open APIs live, looks up energy performance certificates (ADEME) by address, and reports the health and availability of every source. It ships as a local web page (double-click to launch) and as an MCP server for Claude. Read-only, no account required, EUPL-1.2.
+
+### En 20 secondes
+
+![Démonstration : une question, les sources interrogées en direct, la réponse](docs/images/demo.gif)
+
+Projet conçu et maintenu par **QXScale**, cabinet de conseil en qualité logicielle. Les contributions sont bienvenues : voir [CONTRIBUTING.md](CONTRIBUTING.md) et la [feuille de route](docs/ROADMAP.md).
 
 ## À quoi ça sert
 

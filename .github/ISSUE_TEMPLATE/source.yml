@@ -1,0 +1,29 @@
+name: Proposer une source
+description: Une API ou un jeu de données public à brancher sur le hub
+labels: ["nouvelle source"]
+body:
+  - type: input
+    id: nom
+    attributes:
+      label: Nom de la source
+      placeholder: "Ex. : Géorisques, Demandes de valeurs foncières"
+    validations:
+      required: true
+  - type: input
+    id: lien
+    attributes:
+      label: Lien (documentation ou page data.gouv.fr)
+    validations:
+      required: true
+  - type: textarea
+    id: usage
+    attributes:
+      label: Questions auxquelles elle permettrait de répondre
+      placeholder: "Ex. : « Ma commune est-elle exposée au risque d'inondation ? »"
+    validations:
+      required: true
+  - type: dropdown
+    id: acces
+    attributes:
+      label: Accès
+      options: ["Ouvert, sans compte", "Avec compte ou clé", "Je ne sais pas"]
