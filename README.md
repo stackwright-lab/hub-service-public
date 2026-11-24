@@ -6,9 +6,29 @@ Une page web où vous posez une question en français : le hub va chercher la r�
 
 Le hub tourne sur votre machine, en lecture seule. Il fonctionne sans compte ni clé. Avec une clé d'API Anthropic (facultative), les réponses sont rédigées par Claude ; sans clé, la page présente les pistes sourcées trouvées par le hub.
 
+![La page du hub : une question en français, une réponse sourcée](docs/images/hub-reponse.jpg)
+
+*Une question, une réponse qui cite le jeu de données et son producteur. Illustration construite à partir des vraies données Atmo du 20 novembre 2026.*
+
 ## À quoi ça sert
 
 data.gouv.fr publie environ 75 000 jeux de données et 1 270 API, venant de plus de 7 000 producteurs (Insee, ADEME, ministères, collectivités). Tout y est, mais rien n'est simple à trouver : une recherche renvoie des centaines de résultats, plus de 60 % des jeux n'indiquent pas leur fréquence de mise à jour, et lire un fichier suppose en général de le télécharger.
+
+### Le problème, en images
+
+Prenons une question simple : quelle est la qualité de l'air à Lyon en ce moment ?
+
+![Recherche « qualité de l'air » sur data.gouv.fr : 559 résultats](docs/images/datagouv-recherche.jpg)
+
+*Sur data.gouv.fr, la recherche « qualité de l'air » renvoie 559 jeux de données, 64 API et 28 organisations. Lequel répond à la question ? Capture du site data.gouv.fr, 24 novembre 2026.*
+
+![Page d'un jeu de données sur data.gouv.fr : un fichier de 72 076 lignes](docs/images/datagouv-fichier.jpg)
+
+*Une fois le bon jeu trouvé (l'indice ATMO quotidien d'Atmo France), il faut encore lire un fichier de 72 076 lignes, avec des codes (`code_qual`, `code_no2`...) et des coordonnées en Lambert 93, puis filtrer sur la bonne commune et la bonne date. Capture du site data.gouv.fr, 24 novembre 2026.*
+
+Le hub fait ce travail à votre place : il trouve le bon jeu, lit les lignes de Lyon en direct, traduit les codes et vous répond en citant la source, comme dans l'image en haut de cette page. Il signale aussi les limites, ici un fichier qui n'a pas encore été mis à jour pour les derniers jours.
+
+### Comment c'est construit
 
 Le hub repose sur trois briques :
 
@@ -94,11 +114,33 @@ Double-cliquez sur le fichier de lancement, dans le dossier du projet :
 
 Ou, dans un terminal ouvert dans le dossier : `uv run hub-web`.
 
-Une fenêtre de terminal s'ouvre et votre navigateur affiche la page à l'adresse `http://127.0.0.1:8765/`. Laissez la fenêtre du terminal ouverte tant que vous utilisez la page ; fermez-la (ou Ctrl+C) pour arrêter. La page n'est accessible que depuis votre ordinateur.
+Une fenêtre de terminal s'ouvre et votre navigateur affiche la page à l'adresse `http://127.0.0.1:8765/`.
 
-**Onglet « Poser une question ».** Tapez votre question et cliquez sur « Interroger », ou choisissez un exemple. Vous pouvez enchaîner des questions de suivi ; « Nouvelle conversation » repart de zéro. À droite, le tableau « État des sources » indique pour chaque source, classée par catégorie (votre hub, plateforme data.gouv.fr, énergie et logement, adresses et géographie, catalogue des API publiques), si elle est Normale, Ralentie ou Interrompue, avec son temps de réponse. Il se met à jour tout seul toutes les 3 minutes, ou avec « Revérifier ».
+Laissez la fenêtre du terminal ouverte tant que vous utilisez la page ; fermez-la (ou Ctrl+C) pour arrêter. La page n'est accessible que depuis votre ordinateur.
+
+![Page d'accueil du hub : un champ de question et des exemples](docs/images/hub-accueil.jpg)
+
+**Onglet « Poser une question ».** Tapez votre question puis appuyez sur Entrée (ou sur la flèche), ou cliquez sur un exemple. Maj + Entrée passe à la ligne.
+
+Votre question s'affiche à droite, la réponse juste en dessous. Pendant la recherche, chaque source interrogée apparaît en direct, avec une coche quand elle a répondu :
+
+![Recherche en cours : les sources interrogées s'affichent une à une](docs/images/hub-recherche-en-cours.jpg)
+
+Quand la réponse arrive, cette liste se replie en « 3 sources consultées » (cliquez pour la revoir). Le champ de saisie reste en bas de l'écran pour enchaîner les questions de suivi ; « Nouvelle conversation » repart de zéro.
+
+**État des sources.** La pastille en haut à gauche résume la situation : vert si tout répond, orange si une source est lente (plus de 1,5 seconde), rouge si une source est interrompue. Cliquez dessus pour voir le détail par catégorie (votre hub, plateforme data.gouv.fr, énergie et logement, adresses et géographie, catalogue des API publiques), avec le temps de réponse de chacune. Le contrôle se refait toutes les 3 minutes, ou avec « Revérifier ».
+
+![Détail de l'état des sources, classées par catégorie](docs/images/hub-etat-des-sources.jpg)
 
 **Onglet « Santé des données ».** Les chiffres clés du catalogue, la fraîcheur des jeux (filtrable par périodicité), les points d'attention, la complétude des métadonnées, les formats, l'accès et la documentation des API, les producteurs en retard et les jeux en retard les plus consultés (filtrables). Le bouton « Mettre à jour l'index » lance la synchronisation incrémentale et un contrôle d'API, sans passer par le terminal.
+
+![Onglet Santé des données : chiffres clés, fraîcheur, points d'attention](docs/images/hub-sante.jpg)
+
+*Chiffres réels de l'index au 24 novembre 2026 : près de 8 jeux sur 10 ne déclarent aucune fréquence de mise à jour exploitable.*
+
+**Fenêtre étroite.** La page s'adapte à toutes les largeurs, par exemple une fenêtre de navigateur placée à côté d'un document. Elle n'est accessible que depuis l'ordinateur qui fait tourner le hub, pas depuis un téléphone.
+
+<img src="docs/images/hub-mobile.jpg" alt="La page du hub dans une fenêtre étroite" width="320">
 
 **Deux modes de réponse.**
 
