@@ -1,0 +1,9 @@
+# Services de la plateforme surveillés par le tableau de bord (tests en lecture seule : un GET chacun).
+# « joignable » = réponse HTTP < 500 (un MCP répond souvent 405/406 à un simple GET : c'est normal).
+services:
+  - {id: api-datagouv, categorie: "Plateforme data.gouv.fr", type: API, nom: "API data.gouv.fr v1", url: "https://www.data.gouv.fr/api/1/datasets/?page_size=1"}
+  - {id: api-tabulaire, categorie: "Plateforme data.gouv.fr", type: API, nom: "API tabulaire data.gouv.fr", url: "https://tabular-api.data.gouv.fr/api/resources/"}
+  - {id: mcp-datagouv, categorie: "Plateforme data.gouv.fr", type: MCP, nom: "MCP officiel data.gouv.fr", url: "https://mcp.data.gouv.fr/mcp"}
+  - {id: site-datagouv, categorie: "Plateforme data.gouv.fr", type: Site, nom: "Site data.gouv.fr", url: "https://www.data.gouv.fr/"}
+  - {id: ademe-dpe, categorie: "Énergie et logement", type: API, nom: "API ADEME (DPE logements)", url: "https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?size=1&select=numero_dpe"}
+  - {id: geocodage, categorie: "Adresses et géographie", type: API, nom: "Géocodage BAN (Géoplateforme)", url: "https://data.geopf.fr/geocodage/search/?q=Bordeaux&limit=1"}

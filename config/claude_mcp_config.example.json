@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "hub-service-public": {
+      "command": "uv",
+      "args": ["--directory", "/chemin/vers/hub-service-public", "run", "hub-server"]
+    },
+    "datagouv-officiel": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://mcp.data.gouv.fr/mcp"]
+    }
+  }
+}

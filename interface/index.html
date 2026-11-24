@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hub Service Public</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+/* VOICE work : guichet d'information publique, sobre, lisible, accessible
+   IDEA un service en ligne public : bandeau d'en-tête blanc, filets fins, formulaire clair, tableau d'état comme un avis de service
+   PICTURE le tableau d'état des sources, carte blanche à filet bleu, à côté de la question
+   COLOUR blanc, bleu profond #16348f, gris bleuté #f5f6fa, rouge #c8102e pour les incidents, vert #18753c et orange #b34000 pour les états
+   TYPE Source Sans 3 (titres 700, texte 400)
+   LAYOUT laptop : en-tête, puis question (7/12) et état (5/12), réponse dessous ; téléphone : tout empilé */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#121212);--alt:light-dark(#f5f6fa,#1b1b1f);--ink:light-dark(#161616,#eeeeee);--ink2:light-dark(#3a3a3a,#cecece);--mute:light-dark(#666666,#a6a6a6);--line:light-dark(#dddddd,#353535);--blue:light-dark(#16348f,#8aa4ff);--blue-bg:light-dark(#16348f,#2b48a8);--blue-soft:light-dark(#e8edff,#1d2540);--red:light-dark(#c8102e,#ff6b7a);--green:light-dark(#18753c,#4fd07f);--orange:light-dark(#b34000,#ff9a5c)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:17px/1.55 "Source Sans 3",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-weight:700;line-height:1.15;margin:0;letter-spacing:-.005em}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(4vw,16px);padding-right:max(4vw,16px)}
+.hd{border-bottom:1px solid var(--line);box-shadow:0 2px 6px rgba(0,0,18,.06)}
+.hd .wrap{display:flex;align-items:center;gap:16px;min-height:84px;flex-wrap:wrap}
+.logo{width:48px;height:48px;background:var(--blue-bg);color:#fff;display:grid;place-items:center;font:700 16px "Source Sans 3",sans-serif;letter-spacing:.04em;border-bottom:4px solid var(--red)}
+.brand b{display:block;font-size:21px;line-height:1.2}
+.brand span{color:var(--mute);font-size:15px}
+.hd .sp{flex:1}
+.tag{font-size:14px;color:var(--mute);border:1px solid var(--line);padding:2px 10px}
+.top{background:var(--alt);padding-block:clamp(24px,3.5vw,44px)}
+.grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(20px,3vw,40px);align-items:start}
+h1{font-size:clamp(30px,3.6vw,40px)}
+.lede{color:var(--ink2);margin:10px 0 22px;max-width:62ch}
+form{display:flex;flex-direction:column;gap:12px}
+label.lab{font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:600 16px "Source Sans 3",sans-serif;cursor:pointer;min-height:44px;padding:0 22px;border:0;border-radius:0}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.go{background:var(--blue-bg);color:#fff}
+.go:hover{background:light-dark(#0f2466,#3a59c2)}
+.go:disabled{opacity:.6;cursor:progress}
+.ghost{background:transparent;color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue);min-height:40px;padding:0 16px;font-size:15px}
+.ghost:hover{background:var(--blue-soft)}
+.ex{background:var(--bg);color:var(--blue);box-shadow:inset 0 0 0 1px var(--line);min-height:34px;padding:5px 12px;font:500 15px/1.3 "Source Sans 3",sans-serif;text-align:left;border-radius:16px}
+.ex:hover{box-shadow:inset 0 0 0 1px var(--blue);background:var(--blue-soft)}
+.exl{font-size:15px;color:var(--mute);margin-top:6px}
+.board{background:var(--bg);border:1px solid var(--line);border-top:4px solid var(--blue);padding:18px 20px 14px}
+.board h2{font-size:22px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.board h2 small{font:400 14px "Source Sans 3",sans-serif;color:var(--mute)}
+.lines{list-style:none;margin:10px 0 4px;padding:0}
+.lines li.cat{display:block;padding:14px 0 2px;border-top:0;font-size:13px;font-weight:700;color:var(--blue);text-transform:none;letter-spacing:.01em}
+.lines li{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.pin{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:700 13px "Source Sans 3",sans-serif;color:#fff}
+.st{font-size:15px;text-align:right;white-space:nowrap}
+.st b{display:block;font-weight:700}
+.st span{color:var(--mute)}
+.nm{font-weight:600;line-height:1.25}
+.nm small{display:block;color:var(--mute);font-weight:400;font-size:14px}
+.idx{display:grid;grid-template-columns:repeat(auto-fit,minmax(7em,1fr));gap:10px;margin-top:10px;padding-top:12px;border-top:1px solid var(--line)}
+.idx div{font-size:14px;color:var(--mute)}
+.idx b{display:block;color:var(--ink);font:700 22px "Source Sans 3",sans-serif}
+.note{font-size:15px;color:var(--mute)}
+main{padding-block:clamp(24px,3.5vw,44px)}
+.answer{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(20px,3vw,40px);align-items:start}
+.msg{border-bottom:1px solid var(--line);padding:0 0 22px;margin:0 0 22px}
+.q{font:700 22px/1.3 "Source Sans 3",sans-serif;margin:0 0 10px}
+.a{max-width:72ch}
+.a p{margin:0 0 10px}
+.a ul{margin:0 0 10px;padding-left:22px}
+.a a,.trace a,.ft a{color:var(--blue);text-underline-offset:3px}
+.a code{background:var(--alt);padding:1px 5px;font-size:15px}
+.trace{background:var(--alt);border-left:4px solid var(--blue);padding:16px 18px;position:sticky;top:16px}
+.trace h3{font-size:19px;margin-bottom:8px}
+.trace ol{margin:0;padding-left:20px;font-size:15px}
+.trace li{margin:6px 0;overflow-wrap:anywhere}
+.trace li span{color:var(--mute)}
+.empty{color:var(--mute);max-width:60ch}
+.warn{border-left:4px solid var(--red);padding:12px 16px;background:light-dark(#ffe9e9,#3a1a1d);margin:0 0 16px}
+.warn ol{margin:6px 0 0;padding-left:20px}
+.ft{border-top:1px solid var(--line);padding-block:22px;font-size:15px;color:var(--mute)}
+.ft .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+.dots::after{content:"";display:inline-block;width:1.2em;text-align:left;animation:d 1.2s steps(4) infinite}
+@keyframes d{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+@media(prefers-reduced-motion:reduce){.dots::after{animation:none;content:"…"}}
+.tabs{border-bottom:1px solid var(--line);background:var(--bg)}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+.tabs button{background:transparent;color:var(--ink2);min-height:52px;padding:0 18px;border-bottom:3px solid transparent;font-size:17px}
+.tabs button[aria-selected=true]{color:var(--blue);border-bottom-color:var(--blue)}
+.tabs button:hover{background:var(--alt)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:12px;margin:0 0 20px}
+.kpi{background:var(--bg);border:1px solid var(--line);border-top:4px solid var(--blue);padding:14px 16px}
+.kpi b{display:block;font-size:clamp(24px,2.6vw,30px);line-height:1.1}
+.kpi span{color:var(--mute);font-size:15px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px}
+.card{background:var(--bg);border:1px solid var(--line);padding:18px 20px}
+.card.wide{grid-column:1/-1}
+@media(min-width:1060px){.card.span2{grid-column:span 2}}
+.card h3{font-size:19px;margin-bottom:4px}
+.card .sub{color:var(--mute);font-size:15px;margin:0 0 12px}
+.stack{display:flex;height:24px;gap:2px;margin:10px 0}.stack i{display:block;min-width:3px}
+.leg{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:15px;color:var(--ink2)}.leg b{margin-right:4px}
+.br{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(60px,1fr) auto;gap:10px;align-items:center;font-size:15px;margin:7px 0}
+.br .t{display:block;height:10px;background:var(--alt);overflow:hidden}.br .t i{display:block;height:100%;background:var(--blue)}
+.br .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.alrt{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:16px}.alrt:first-child{border-top:0}.alrt i{font-style:normal;font-weight:700;width:16px}
+.scroll{overflow:auto;max-height:420px}
+table{width:100%;border-collapse:collapse;font-size:15px}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink2);font-weight:600;position:sticky;top:0;background:var(--bg)}td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+select,input[type=search]{font:16px "Source Sans 3",sans-serif;padding:8px 10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:40px}
+.hhead{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}
+.hhead h2{font-size:clamp(26px,3vw,34px)}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#p-q{background:var(--alt);min-height:calc(100vh - 140px)}
+.chat{max-width:800px;margin:0 auto;padding:20px max(4vw,16px) 0;display:flex;flex-direction:column;min-height:calc(100vh - 140px)}
+.ctop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--bg);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line);border-radius:999px;min-height:36px;padding:0 14px;font:500 15px "Source Sans 3",sans-serif}
+.pill:hover{box-shadow:inset 0 0 0 1px var(--blue)}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:var(--mute)}
+.pill .chev{font-size:12px;color:var(--mute);transition:transform .2s}
+.pill[aria-expanded=true] .chev{transform:rotate(180deg)}
+#reset{border-radius:999px;min-height:36px;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink2);background:var(--bg)}
+#reset:hover{color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.chat .board{margin-top:12px;border-radius:16px;border-top-width:1px;box-shadow:0 12px 40px rgba(0,0,18,.10)}
+.hero{text-align:center;padding:clamp(48px,10vh,110px) 0 28px}
+.hero h1{font-size:clamp(34px,5vw,52px);letter-spacing:-.02em}
+.hero .lede{margin:14px auto 0;max-width:56ch;color:var(--ink2)}
+.chat.started .hero{display:none}
+#thread{flex:1;padding-top:8px}
+.chat:not(.started) #thread{flex:0;padding:0}
+.chat:not(.started) .dock{margin-bottom:clamp(40px,10vh,120px)}
+.turn{margin:22px 0 30px;scroll-margin-top:16px;animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.qb{display:flex;justify-content:flex-end;margin-bottom:14px}
+.qb p{margin:0;background:var(--blue-bg);color:#fff;padding:10px 16px;border-radius:20px 20px 6px 20px;max-width:82%;font-size:17px;line-height:1.45;overflow-wrap:anywhere}
+.ab{display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;align-items:start}
+.av{width:32px;height:32px;border-radius:9px;background:var(--blue-bg);color:#fff;display:grid;place-items:center;font:700 11px "Source Sans 3",sans-serif;letter-spacing:.03em;border-bottom:3px solid var(--red)}
+.abody{background:var(--bg);border-radius:6px 20px 20px 20px;padding:14px 18px;box-shadow:0 1px 2px rgba(0,0,18,.06),0 0 0 1px var(--line)}
+.steps{margin:0 0 6px;font-size:15px;color:var(--mute)}
+.steps summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;color:var(--ink2);font-weight:600}
+.steps summary::-webkit-details-marker{display:none}
+.steps summary::after{content:"▾";font-size:11px;color:var(--mute);transition:transform .2s}
+.steps[open] summary::after{transform:rotate(180deg)}
+.steps ol{list-style:none;margin:8px 0 4px;padding:0}
+.steps li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:8px;padding:3px 0;overflow-wrap:anywhere}
+.steps li i{font-style:normal;font-weight:700;color:var(--green)}
+.steps li.err i{color:var(--red)}
+.steps li.run i{color:var(--blue)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--blue-soft);border-top-color:var(--blue);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.dock{position:sticky;bottom:0;padding:12px 0 18px;background:linear-gradient(to bottom,transparent,var(--alt) 28%)}
+.chat:not(.started) .dock{position:static;background:none;padding-top:0}
+.composer{display:flex;flex-direction:row;align-items:flex-end;gap:8px;background:var(--bg);border-radius:18px;padding:8px 8px 8px 18px;box-shadow:0 0 0 1px var(--line),0 10px 30px rgba(0,0,18,.08);transition:box-shadow .2s}
+.composer:focus-within{box-shadow:0 0 0 2px var(--blue),0 10px 30px rgba(0,0,18,.10)}
+.composer textarea{flex:1;width:100%;height:42px;border:0;background:transparent;resize:none;min-height:28px;max-height:180px;padding:8px 0;font:18px/1.45 "Source Sans 3",sans-serif;color:var(--ink);outline:none;border-radius:0}
+.send{width:40px;height:40px;min-height:40px;padding:0;border-radius:50%;background:var(--blue-bg);color:#fff;display:grid;place-items:center;flex:none}
+.send:hover{background:light-dark(#0f2466,#3a59c2)}
+.send:disabled{opacity:.35;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.chat.started .chips,.chat.started .hint{display:none}
+.chips button{background:var(--bg);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line);border-radius:999px;min-height:36px;padding:6px 14px;font:500 15px/1.3 "Source Sans 3",sans-serif;text-align:left}
+.chips button:hover{color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.hint{text-align:center;font-size:14px;color:var(--mute);margin:12px 0 0}
+@media(prefers-reduced-motion:reduce){.turn{animation:none}.spin{animation:none}}
+@media(max-width:860px){.tag{display:none}}
+</style>
+</head>
+<body>
+<header class="hd">
+ <div class="wrap">
+  <div class="logo" aria-hidden="true">HSP</div>
+  <div class="brand"><b>Hub Service Public</b><span>Les données publiques françaises, interrogées pour vous</span></div>
+  <span class="sp"></span>
+  <span class="tag">Projet indépendant</span>
+ </div>
+</header>
+<nav class="tabs" aria-label="Sections"><div class="wrap" role="tablist">
+ <button type="button" role="tab" id="t-q" aria-controls="p-q" aria-selected="true">Poser une question</button>
+ <button type="button" role="tab" id="t-h" aria-controls="p-h" aria-selected="false">Santé des données</button>
+</div></nav>
+<div id="p-q" role="tabpanel" aria-labelledby="t-q">
+<div class="chat" id="chat">
+ <div class="ctop">
+  <button type="button" class="pill" id="pill" aria-expanded="false" aria-controls="board"><span class="dot" id="pdot"></span><span id="ptxt">Vérification des sources…</span><span class="chev" aria-hidden="true">▾</span></button>
+  <button type="button" class="ghost" id="reset" hidden>Nouvelle conversation</button>
+ </div>
+ <section class="board" id="board" aria-labelledby="bt" hidden>
+  <h2 id="bt">État des sources <small id="when">vérification…</small></h2>
+  <ul class="lines" id="lines"></ul>
+  <div class="idx" id="idx"></div>
+  <div class="row" style="justify-content:space-between;margin-top:10px">
+   <span class="note" id="legend">Normal &lt; 1,5 s · Ralenti au-delà · Interrompu : erreur serveur ou injoignable</span>
+   <button class="ghost" id="recheck" type="button">Revérifier</button>
+  </div>
+ </section>
+ <div id="setup"></div>
+ <div class="hero" id="hero">
+  <h1>Posez votre question</h1>
+  <p class="lede">Le hub cherche dans les 75&nbsp;000 jeux de données de data.gouv.fr, les 1&nbsp;270 API publiques, les DPE de l'ADEME et la Base Adresse Nationale, puis répond en citant ses sources.</p>
+ </div>
+ <div id="thread" aria-live="polite"></div>
+ <div class="dock" id="dock">
+  <form id="f" class="composer">
+   <label for="q" class="sr">Votre question</label>
+   <textarea id="q" rows="1" placeholder="Posez votre question…" required></textarea>
+   <button class="send" id="go" type="submit" aria-label="Interroger"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </form>
+  <div class="chips" id="ex" aria-label="Exemples de questions"></div>
+  <p class="hint">Entrée pour envoyer · Maj + Entrée pour aller à la ligne</p>
+ </div>
+</div>
+</div>
+<div id="p-h" role="tabpanel" aria-labelledby="t-h" hidden>
+ <section class="top"><div class="wrap">
+  <div class="hhead"><div><h2>Santé des données</h2><p class="note" id="h-asof" style="margin:6px 0 0">Chargement des indicateurs…</p></div>
+   <div class="row"><span class="note" id="sync-st"></span><button class="go" id="sync" type="button">Mettre à jour l'index</button></div></div>
+  <div class="kpis" id="h-kpis"></div>
+  <div class="cards" id="h-cards"></div>
+ </div></section>
+</div>
+<footer class="ft"><div class="wrap"><span>Projet indépendant, non affilié à l'administration. Données : data.gouv.fr, ADEME, Base Adresse Nationale, sous leurs licences respectives.</span></div></footer>
+<script>
+{
+const HOST = "host:hub-service-public";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const nf = new Intl.NumberFormat("fr-FR");
+const EXAMPLES = ["Quel est le DPE du 10 rue de Rivoli à Paris ?", "Combien de ventes immobilières à Bordeaux en 2024 ?", "Quelle est la qualité de l'air à Lyon aujourd'hui ?", "Quels jeux de données l'Insee publie-t-il sur la population ?", "Quelles API permettent de vérifier un numéro SIRET ?"];
+const TYPES = {datasets:"Jeux", dataservices:"API", organizations:"Producteurs", reuses:"Réutilisations"};
+let mcp = null, sample = null, hostOk = null, history = [], busy = false;
+
+function ago(iso){ if(!iso) return "jamais"; const s=(Date.now()-new Date(iso).getTime())/1000; if(s<90) return "à l'instant"; if(s<5400) return "il y a "+Math.round(s/60)+" min"; if(s<172800) return "il y a "+Math.round(s/3600)+" h"; return "il y a "+Math.round(s/86400)+" j"; }
+function state(ok, ms){ if(!ok) return ["Interrompu","var(--red)","✕"]; if(ms!=null && ms>1500) return ["Ralenti","var(--orange)","!"]; return ["Normal","var(--green)","✓"]; }
+function line(pinTxt, color, name, sub, st, detail){ return `<li><span class="pin" style="background:${color}" aria-hidden="true">${esc(pinTxt)}</span><span class="nm">${esc(name)}<small>${esc(sub)}</small></span><span class="st"><b>${esc(st)}</b><span>${esc(detail)}</span></span></li>`; }
+
+const CAT_ORDER = ["Votre hub", "Plateforme data.gouv.fr", "Énergie et logement", "Adresses et géographie", "Catalogue des API publiques", "Autres sources"];
+let LAST_STATUS = null;
+function renderStatus(d){
+ LAST_STATUS = d;
+ const groups = {"Votre hub":[line("✓","var(--green)","Hub local","index et outils, sur cet ordinateur","Normal","connecté")]};
+ for(const s of d.services || []){ const [lab,col,pin]=state(s.ok, s.latency_ms); (groups[s.categorie||"Autres sources"] ||= []).push(line(pin,col,s.nom,s.type,lab,(s.ok?"":"HTTP "+(s.status||"—")+" · ")+(s.latency_ms!=null?nf.format(s.latency_ms)+" ms":""))); }
+ const api = d.api_catalogue;
+ if(api && api.testees){ const pct=Math.round(100*api.joignables/api.testees); const col=pct>=90?"var(--green)":pct>=70?"var(--orange)":"var(--red)"; groups["Catalogue des API publiques"]=[line(pct+"",col,"API référencées sur data.gouv.fr","échantillon de "+nf.format(api.testees)+" sur "+nf.format(api.total||0)+", testé "+ago(api.dernier_test),pct+" % joignables",api.latence_mediane_ms!=null?"médiane "+nf.format(api.latence_mediane_ms)+" ms":"")]; }
+ $("lines").innerHTML = CAT_ORDER.filter(c=>groups[c]).map(c=>`<li class="cat">${esc(c)}</li>`+groups[c].join("")).join("");
+ const ix = d.index && d.index.par_type;
+ if(ix){
+  const age = ix.datasets && ix.datasets.derniere_synchro;
+  const days = age ? (Date.now()-new Date(age).getTime())/864e5 : 999;
+  const cells = Object.keys(TYPES).map(k => `<div><b>${ix[k] && ix[k].elements!=null ? nf.format(ix[k].elements) : "—"}</b>${TYPES[k]}</div>`);
+  cells.push(`<div><b style="color:${days<8?"var(--ink)":days<31?"var(--orange)":"var(--red)"}">${esc(ago(age))}</b>dernière synchro</div>`);
+  $("idx").innerHTML = cells.join("");
+ } else $("idx").innerHTML = `<div>Index local absent : lancez une synchronisation.</div>`;
+ $("when").textContent = "vérifié " + ago(d.verifie_le);
+ const svc=d.services||[], down=svc.filter(x=>!x.ok).length, slow=svc.filter(x=>x.ok&&x.latency_ms>1500).length;
+ setPill(down?"var(--red)":slow?"var(--orange)":"var(--green)", down?`${down} source${down>1?"s":""} interrompue${down>1?"s":""}`:slow?`${slow} source${slow>1?"s":""} ralentie${slow>1?"s":""}`:`Toutes les sources répondent (${svc.length+1})`);
+ syncState(d.synchronisation);
+}
+
+function renderHostDown(code){
+ hostOk = false;
+ $("lines").innerHTML = line("✕","var(--red)","Hub local", code==="not_in_manifest"?"accès refusé pour cette page":"non joignable depuis cette vue","Interrompu","")
+  + line("?","var(--mute)","Sources publiques","vérifiées par le hub","Inconnu","");
+ $("idx").innerHTML = "";
+ $("when").textContent = "hub indisponible";
+ setPill("var(--red)","Hub local injoignable");
+ $("setup").innerHTML = window.HUB_LOCAL ? `<div class="warn"><b>La page ne joint plus le hub.</b> La fenêtre qui fait tourner le hub a sans doute été fermée : relancez « Lancer Hub Service Public », puis rechargez cette page.</div>` : `<div class="warn"><b>Le hub local n'est pas joignable.</b> Cette page interroge le hub installé sur votre Mac ; elle fonctionne dans l'application Claude pour Mac, pas dans un navigateur ni sur téléphone.${code==="not_in_manifest"?" Autorisez l'accès au hub quand l'application le demande, puis rechargez.":`<ol><li>Ouvrez cette page dans l'application Claude sur votre Mac.</li><li>Vérifiez que le serveur « hub-service-public » figure dans Réglages → Développeur (configuration unique).</li><li>Redémarrez l'application Claude, puis cliquez sur « Revérifier ».</li></ol>`}</div>`;
+ $("go").disabled = true;
+}
+
+let unwatch = null;
+function watchStatus(){
+ if(unwatch) unwatch();
+ unwatch = mcp.watchTool(HOST, "disponibilite_sources", null, ev => {
+  if(ev.type === "data"){ hostOk = true; $("setup").innerHTML=""; $("go").disabled = busy; renderStatus(ev.result.payload || {}); }
+  else if(["server_not_connected","not_in_manifest","not_granted","capability_disabled","blocked_by_policy"].includes(ev.error.code)) renderHostDown(ev.error.code);
+  else $("when").textContent = "dernière vérification en échec";
+ }, {refetchInterval: 180000, cache:{staleTime:60000, gcTime:600000}});
+}
+
+$("recheck").onclick = async () => {
+ if(!mcp) return;
+ $("when").textContent = "vérification…";
+ try { const r = await mcp.callTool(HOST, "disponibilite_sources", null, {cache:{refresh:true, staleTime:60000, gcTime:600000}}); hostOk=true; $("setup").innerHTML=""; $("go").disabled=busy; renderStatus(r.payload||{}); }
+ catch(e){ if(["server_not_connected","not_in_manifest","not_granted"].includes(e.code)) renderHostDown(e.code); else $("when").textContent = "échec : " + (e.message||e.code); }
+};
+
+/* ---------- outils donnés à Claude : chacun appelle le hub local ---------- */
+const S = (props, req) => ({type:"object", properties:props, required:req||[]});
+const str = d => ({type:"string", description:d}), int = d => ({type:"integer", description:d}), obj = d => ({type:"object", description:d}), arr = d => ({type:"array", items:{type:"string"}, description:d});
+const TOOLS = [
+ ["repondre","Point de départ pour toute question : enquête complète dans le catalogue (jeux, API) avec lecture en direct des premières lignes des fichiers, filtrées sur le lieu cité. Reconnaît aussi les DPE d'adresse.", S({question:str("La question de l'utilisateur")},["question"])],
+ ["dpe_par_adresse","DPE (diagnostic de performance énergétique) d'une adresse précise avec numéro de rue, en direct (ADEME + Base Adresse Nationale).", S({adresse:str("Adresse complète, ex. 10 rue de Rivoli, Paris"), limite:int("Nombre maximal de diagnostics, 20 par défaut")},["adresse"])],
+ ["rechercher","Recherche plein texte dans le catalogue data.gouv.fr.", S({requete:str("Mots-clés"), type:str("jeux_de_donnees | api | organisations | reutilisations | discussions | tout"), producteur:str("Partie du nom du producteur"), format:str("csv, json…"), interrogeable:{type:"boolean",description:"true : seulement les jeux lisibles avec interroger_fichier"}, limite:int("10 par défaut")},["requete"])],
+ ["fiche_jeu_de_donnees","Fiche complète d'un jeu : description, fichiers (resource_id, format, interrogeable).", S({identifiant:str("id ou slug du jeu")},["identifiant"])],
+ ["fiche_api","Fiche d'une API du catalogue : accès, URL de base, documentation.", S({identifiant:str("id ou slug")},["identifiant"])],
+ ["fiche_organisation","Fiche d'un producteur : jeux principaux et API.", S({identifiant:str("id ou slug")},["identifiant"])],
+ ["profil_fichier","Colonnes et valeurs fréquentes d'un fichier tabulaire, à lire avant interroger_fichier.", S({resource_id:str("Identifiant du fichier")},["resource_id"])],
+ ["interroger_fichier","Lit, filtre, trie, regroupe et compte les lignes d'un fichier tabulaire en direct.", S({resource_id:str("Identifiant du fichier"), colonnes:arr("Colonnes à renvoyer"), filtres:obj("{\"colonne__operateur\": valeur} ; opérateurs exact, differs, contains, in, isnull, less, greater"), tri:obj("{\"colonne\": \"asc\"|\"desc\"}"), regrouper_par:arr("Colonnes de regroupement"), compter:arr("Colonnes à compter"), page:int("1 par défaut"), taille_page:int("50 maximum")},["resource_id"])],
+ ["documentation_api","Documentation OpenAPI d'une API du catalogue (opérations GET et paramètres), à lire avant appeler_api.", S({identifiant:str("id ou slug de l'API")},["identifiant"])],
+ ["appeler_api","Appel GET d'une API ouverte du catalogue.", S({identifiant:str("id ou slug"), chemin:str("Chemin relatif, ex. /siren/123456789"), parametres:obj("Paramètres de requête"), serveur_openapi:{type:"boolean",description:"Partir du serveur déclaré dans l'OpenAPI"}},["identifiant","chemin"])]
+];
+const LABEL = {repondre:"Enquête dans le catalogue", dpe_par_adresse:"DPE de l'adresse", rechercher:"Recherche", fiche_jeu_de_donnees:"Fiche du jeu", fiche_api:"Fiche de l'API", fiche_organisation:"Fiche du producteur", profil_fichier:"Profil du fichier", interroger_fichier:"Lecture du fichier", documentation_api:"Documentation de l'API", appeler_api:"Appel de l'API"};
+let CUR=null;
+function addTrace(name, input){
+ if(!CUR) return null;
+ CUR.steps.hidden=false; CUR.n++;
+ const li=document.createElement("li"); li.className="run";
+ const arg = input.question || input.adresse || input.requete || input.identifiant || input.resource_id || "";
+ li.innerHTML = `<i><span class="spin"></span></i><span>${esc(LABEL[name]||name)}${arg?` <span style="color:var(--mute)">· ${esc(String(arg).slice(0,80))}</span>`:""}</span>`;
+ CUR.list.appendChild(li); CUR.sum.textContent = "Recherche en cours…";
+ return li;
+}
+function doneTrace(li, ok, code){ if(!li) return; li.className=ok?"":"err"; li.querySelector("i").textContent=ok?"✓":"✕"; if(!ok) li.lastChild.appendChild(document.createTextNode(" ("+code+")")); }
+const toolDefs = () => TOOLS.map(([name, description, inputSchema]) => ({name, description, inputSchema, async execute(input){
+ const li = addTrace(name, input||{});
+ try {
+  const r = await mcp.callTool(HOST, name, input||{}, {cache:false});
+  let txt = JSON.stringify(r.payload ?? r.content);
+  if(txt.length > 14000) txt = txt.slice(0,14000) + " …[tronqué : affinez la requête]";
+  doneTrace(li, true);
+  return txt;
+ } catch(e){ doneTrace(li, false, e.code||"erreur"); throw new Error((e.code||"erreur") + " : " + (e.message||"")); }
+}}));
+
+const BRIEF = `Tu es l'assistant du Hub Service Public de l'utilisateur. Réponds en français, de façon directe et structurée.
+Règles :
+- Appuie chaque fait sur les outils (jamais sur ta mémoire). Commence par l'outil repondre ; pour un DPE d'adresse, dpe_par_adresse.
+- Approfondis si besoin : profil_fichier puis interroger_fichier (filtres, regroupements, comptages) pour obtenir un chiffre exact ; documentation_api puis appeler_api pour une API.
+- Si l'information n'existe pas dans les sources, dis-le clairement et indique où la trouver.
+- Format : une réponse courte en premier (le chiffre, l'étiquette, le fait), puis les détails utiles en liste, puis une ligne « Sources : » avec le nom du jeu, le producteur, la date des données et le lien https quand il existe.
+- Signale les limites (données anciennes, couverture partielle, échantillon).
+Texte simple : **gras**, listes avec « - », liens [texte](https://…). Pas de tableaux.`;
+
+function md(t){
+ const lines = esc(t).split("\n"); let html="", inList=false;
+ const inline = s => s.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\[([^\]]+)\]\((https:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+ for(const l of lines){ const m=l.match(/^\s*[-*•]\s+(.*)/); if(m){ if(!inList){html+="<ul>";inList=true;} html+="<li>"+inline(m[1])+"</li>"; } else { if(inList){html+="</ul>";inList=false;} if(l.trim()) html+="<p>"+inline(l.replace(/^#+\s*/,""))+"</p>"; } }
+ return html + (inList?"</ul>":"");
+}
+
+async function ask(question){
+ question = (question||"").trim();
+ if(busy || !question) return;
+ if(!sample){ $("setup").innerHTML = `<div class="warn"><b>L'assistant n'est pas disponible dans cette vue.</b> Lancez la page avec « Lancer Hub Service Public », ou ouvrez-la dans l'application Claude.</div>`; return; }
+ busy = true; $("go").disabled = true; $("chat").classList.add("started"); $("reset").hidden = false;
+ const turn = document.createElement("article"); turn.className = "turn";
+ turn.innerHTML = `<div class="qb"><p></p></div><div class="ab"><div class="av" aria-hidden="true">HSP</div><div class="abody"><details class="steps" open hidden><summary>Recherche en cours…</summary><ol></ol></details><div class="a"><p class="note"><span class="spin"></span>&nbsp; Recherche dans les sources publiques…</p></div></div></div>`;
+ turn.querySelector(".qb p").textContent = question;
+ $("thread").appendChild(turn);
+ CUR = {steps: turn.querySelector(".steps"), list: turn.querySelector(".steps ol"), sum: turn.querySelector(".steps summary"), n: 0};
+ requestAnimationFrame(() => turn.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start"}));
+ const a = turn.querySelector(".a"), cur = CUR;
+ history.push({role:"user", content: history.length ? question : BRIEF + "\n\nQuestion : " + question});
+ try {
+  const r = await sample(history, {tools: toolDefs(), cache:false, modelTier:"default", onText: ({text}) => { if(text && text !== "Thinking...") a.innerHTML = md(text); }});
+  a.innerHTML = md(r.text || "Pas de réponse.");
+  history.push({role:"assistant", content: r.text || ""});
+ } catch(e){
+  history.pop();
+  const msg = e.code==="not_granted" ? "L'accès à l'assistant n'a pas été autorisé pour cette page." : e.code==="rate_limited" ? "Trop de demandes : réessayez dans une minute." : "La réponse a échoué (" + (e.code||"erreur") + "). " + (e.message||"");
+  a.innerHTML = e.text ? md(e.text) : "";
+  const p = document.createElement("p"); p.className="note"; p.textContent = msg; a.appendChild(p);
+ } finally {
+  if(cur.n){ cur.sum.textContent = cur.n + (cur.n>1 ? " sources consultées" : " source consultée"); cur.steps.open = false; }
+  CUR = null; busy = false; $("go").disabled = hostOk === false; $("q").focus();
+ }
+}
+
+$("f").addEventListener("submit", ev => { ev.preventDefault(); const q=$("q").value; $("q").value=""; grow(); ask(q); });
+function grow(){ const t=$("q"); t.style.height="auto"; t.style.height=Math.min(t.scrollHeight,180)+"px"; }
+$("q").addEventListener("input", grow);
+$("pill").onclick = () => { const b=$("board"), open=b.hidden; b.hidden=!open; $("pill").setAttribute("aria-expanded", open); };
+function setPill(color, text){ $("pdot").style.background=color; $("ptxt").textContent=text; }
+$("q").addEventListener("keydown", ev => { if(ev.key==="Enter" && !ev.shiftKey){ ev.preventDefault(); $("f").requestSubmit(); } });
+$("reset").onclick = () => { history=[]; $("thread").innerHTML=""; $("chat").classList.remove("started"); $("reset").hidden=true; $("q").focus(); window.scrollTo({top:0}); };
+$("ex").innerHTML = EXAMPLES.map((t,i)=>`<button type="button" data-i="${i}">${esc(t)}</button>`).join("");
+$("ex").addEventListener("click", ev => { const b=ev.target.closest("button"); if(b){ ask(EXAMPLES[+b.dataset.i]); } });
+$("lines").innerHTML = line("…","var(--mute)","Connexion au hub local","sur cet ordinateur","…","");
+
+/* ---------- Santé des données ---------- */
+const FREQ={continuous:"Continu",severalTimesADay:"Plusieurs fois par jour",hourly:"Horaire",daily:"Quotidien",weekly:"Hebdomadaire",biweekly:"Bimensuel",monthly:"Mensuel",bimonthly:"Tous les 2 mois",quarterly:"Trimestriel",threeTimesAYear:"3 fois par an",semiannual:"Semestriel",annual:"Annuel",biennial:"Tous les 2 ans",triennial:"Tous les 3 ans",quinquennial:"Tous les 5 ans",unknown:"Inconnue",punctual:"Ponctuel",irregular:"Irrégulier",notPlanned:"Non planifié",never:"Jamais",other:"Autre"};
+const FST={a_jour:["À jour","var(--green)","✓"],en_retard:["En retard","var(--orange)","!"],perime:["Périmé","var(--red)","✕"],sans_engagement:["Sans engagement","var(--mute)","–"]};
+const pct=(a,b)=>b?(100*a/b).toFixed(1).replace(".",","):"0";
+const card=(title,sub,body,wide)=>`<div class="card${wide===true?" wide":wide?" "+wide:""}"><h3>${esc(title)}</h3>${sub?`<p class="sub">${esc(sub)}</p>`:""}${body}</div>`;
+function stack(parts){const t=parts.reduce((a,p)=>a+p.v,0)||1;return `<div class="stack" role="img" aria-label="répartition">${parts.filter(p=>p.v).map(p=>`<i style="flex:${p.v};background:${p.c}" title="${esc(p.l)} : ${nf.format(p.v)}"></i>`).join("")}</div><div class="leg">${parts.map(p=>`<span><b style="color:${p.c}">${p.i}</b>${esc(p.l)} · ${nf.format(p.v)} (${pct(p.v,t)} %)</span>`).join("")}</div>`;}
+function bars(rows){const mx=Math.max(1,...rows.map(r=>r[1]));return rows.map(r=>`<div class="br"><span>${esc(r[0])}</span><span class="t"><i style="width:${100*r[1]/mx}%"></i></span><span class="v">${nf.format(r[1])}</span></div>`).join("");}
+function tbl(head,rows,num){return `<div class="scroll"><table><thead><tr>${head.map((h,i)=>`<th class="${num.includes(i)?"n":""}">${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${num.includes(i)?"n":""}">${esc(typeof c==="number"?nf.format(c):c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;}
+let H=null;
+function renderHealth(d){
+ H=d; const c=d.counts||{}, ds=d.datasets, f=ds.fresh, fl=ds.flags, a=d.apis, lv=a.live||{}, o=d.orgs, ru=d.reuses, di=d.discussions;
+ $("h-asof").textContent="Calculé sur l'index local le "+new Date(d.generated_at).toLocaleString("fr-FR",{dateStyle:"long",timeStyle:"short"})+". La fraîcheur compare la date de mise à jour à la périodicité déclarée par le producteur.";
+ $("h-kpis").innerHTML=[["datasets","jeux de données"],["resources","fichiers"],["dataservices","API"],["organizations","producteurs"],["reuses","réutilisations"],["discussions","discussions"]].map(([k,l])=>`<div class="kpi"><b>${nf.format(c[k]||0)}</b><span>${l}</span></div>`).join("");
+ const committed=f.a_jour+f.en_retard+f.perime;
+ const freqs=Object.keys(ds.by_freq||{}).sort((x,y)=>ds.by_freq[y].total-ds.by_freq[x].total);
+ const alerts=[["crit",`${pct(f.sans_engagement,fl.total)} % des jeux (${nf.format(f.sans_engagement)}) n'ont aucune périodicité exploitable : leur fraîcheur ne peut pas être pilotée.`],
+  [committed&&f.perime/committed>.3?"crit":"warn",`Parmi les jeux qui s'engagent sur une périodicité, ${pct(f.perime,committed)} % sont périmés (plus de 3 périodes sans mise à jour).`],
+  ...(d.orgs_late&&d.orgs_late.length?[["warn",`Producteur le plus en retard (au moins 20 jeux) : ${d.orgs_late[0][0]}, ${nf.format(d.orgs_late[0][1])} jeux sur ${nf.format(d.orgs_late[0][2])}.`]]:[]),
+  ["warn",`${pct(a.no_machine_doc,a.total)} % des API n'ont pas de documentation lisible par machine (OpenAPI).`],
+  ["warn",`${nf.format(di.unanswered_30d)} discussions ouvertes restent sans réponse depuis plus de 30 jours.`]];
+ $("h-cards").innerHTML=[
+  card("Fraîcheur des jeux de données","Choisissez une périodicité pour isoler ses jeux.",`<select id="h-freq" aria-label="Périodicité"><option value="">Toutes les périodicités</option>${freqs.map(k=>`<option value="${esc(k)}">${esc(FREQ[k]||k)} (${nf.format(ds.by_freq[k].total)})</option>`).join("")}</select><div id="h-fr"></div><p class="note">Avec engagement de mise à jour : ${pct(f.a_jour,committed)} % à jour.</p>`),
+  card("Points d'attention",null,alerts.map(x=>`<div class="alrt"><i style="color:${x[0]==="crit"?"var(--red)":"var(--orange)"}">${x[0]==="crit"?"✕":"!"}</i><span>${esc(x[1])}</span></div>`).join("")),
+  card("Complétude des métadonnées",`Base : ${nf.format(fl.total)} jeux publics.`,bars([["Licence non précisée",fl.no_license],["Sans fichier",fl.no_resource],["Description de moins de 30 caractères",fl.short_desc],["Sans mots-clés",fl.no_tags]])),
+  card("Formats de fichiers",`${pct(d.resources.tabular,d.resources.total)} % des fichiers sont lisibles en direct par l'API tabulaire.`,bars(d.resources.formats)),
+  card("API : accès",`Base : ${nf.format(a.total)} API.`,bars([["Accès ouvert",a.open],["Ouvert avec compte",a.account],["Accès restreint",a.restricted]])),
+  card("API : documentation",null,bars([["Sans documentation machine (OpenAPI)",a.no_machine_doc],["Sans documentation technique",a.no_tech_doc],["Sans limite de débit renseignée",a.no_rate],["Sans URL de base",a.no_base]])+(lv.tested?`<p class="note">Joignabilité mesurée sur ${nf.format(lv.tested)} API : ${nf.format(lv.reachable)} joignables, ${nf.format(lv.server_error)} en erreur serveur, ${nf.format(lv.down)} injoignables.</p>`:"")),
+  card("Écosystème",null,bars([["Producteurs sans jeu ni API",o.empty],["Producteurs sans description",o.no_desc],["Réutilisations sans jeu rattaché",ru.no_dataset],["Discussions ouvertes",di.open],["Ouvertes sans réponse depuis 30 jours",di.unanswered_30d]])),
+  card("Producteurs les plus en retard","Producteurs d'au moins 20 jeux, part de jeux en retard ou périmés.",tbl(["Producteur","En retard ou périmés","Jeux","Part"],(d.orgs_late||[]).map(r=>[r[0],r[1],r[2],pct(r[1],r[2])+" %"]),[1,2,3]),"span2"),
+  card("Jeux en retard les plus consultés","Jeux qui déclarent une périodicité et ne la tiennent pas, classés par nombre de vues.",`<input type="search" id="h-q" placeholder="Filtrer : covid, Insee, Bordeaux…" aria-label="Filtrer les jeux"><div id="h-late" style="margin-top:10px"></div>`,true)
+ ].join("");
+ const drawF=()=>{const k=$("h-freq").value, x=k?ds.by_freq[k]:f; $("h-fr").innerHTML=stack(["a_jour","en_retard","perime","sans_engagement"].map(s=>({l:FST[s][0],v:x[s]||0,c:FST[s][1],i:FST[s][2]})));};
+ const drawL=()=>{const q=($("h-q").value||"").toLowerCase(); const rows=ds.late_rows.filter(r=>!q||r.join(" ").toLowerCase().includes(q)).slice(0,100).map(r=>[r[0],r[1]||"—",FREQ[r[2]]||r[2],r[3],FST[r[4]][0],r[5]]); $("h-late").innerHTML=rows.length?tbl(["Jeu","Producteur","Périodicité","Dernière mise à jour","État","Vues"],rows,[5]):`<p class="note">Aucun jeu ne correspond.</p>`;};
+ $("h-freq").onchange=drawF; $("h-q").oninput=drawL; drawF(); drawL();
+}
+let unwatchH=null;
+function watchHealth(){
+ if(unwatchH) return;
+ unwatchH = mcp.watchTool(HOST, "sante_des_donnees", null, ev => {
+  if(ev.type==="data") renderHealth(ev.result.payload||{});
+  else $("h-asof").textContent = "Indicateurs indisponibles : " + (ev.error.code==="server_not_connected"?"le hub local n'est pas joignable.":ev.error.message||ev.error.code);
+ }, {cache:{staleTime:600000, gcTime:3600000}});
+}
+let syncPoll=null, wasSyncing=false;
+function syncState(s){
+ if(!s) return;
+ const b=$("sync"), st=$("sync-st");
+ if(s.en_cours){ b.disabled=true; st.textContent="En cours : "+(s.etape||"…"); wasSyncing=true; if(!syncPoll) syncPoll=setInterval(()=>$("recheck").click(),20000); }
+ else { b.disabled=false; if(syncPoll){clearInterval(syncPoll);syncPoll=null;}
+  if(s.erreur) st.textContent="Dernière mise à jour en échec : "+s.erreur;
+  else if(s.fin) st.textContent="Dernière mise à jour : "+ago(s.fin);
+  if(wasSyncing && !s.erreur){ wasSyncing=false; mcp.invalidate(HOST,"sante_des_donnees").catch(()=>{}); } }
+}
+$("sync").onclick = async () => {
+ if(!mcp) return; $("sync").disabled=true; $("sync-st").textContent="Démarrage…";
+ try { const r = await mcp.callTool(HOST, "synchroniser_index", null, {cache:false}); syncState(r.payload||{}); setTimeout(()=>$("recheck").click(),3000); }
+ catch(e){ $("sync").disabled=false; $("sync-st").textContent = e.code==="cancelled" ? "Mise à jour annulée." : "Échec : "+(e.message||e.code); }
+};
+function showTab(id){
+ const q=id!=="sante";
+ $("p-q").hidden=!q; $("p-h").hidden=q;
+ $("t-q").setAttribute("aria-selected",q); $("t-h").setAttribute("aria-selected",!q);
+ try{ history.replaceState(null,"","#"+(q?"questions":"sante")); }catch(e){}
+ if(!q && mcp) watchHealth();
+}
+$("t-q").onclick=()=>showTab("questions"); $("t-h").onclick=()=>showTab("sante");
+
+(async () => {
+ const c = window.claude;
+ if(!c){ renderHostDown("server_not_connected"); return; }
+ [mcp, sample] = await Promise.all([c.use("mcp"), c.use("sample")]);
+ if(!mcp){ renderHostDown("server_not_connected"); return; }
+ watchStatus();
+ showTab((location.hash||"").slice(1)==="sante"?"sante":"questions");
+})();
+}
+</script>
+</body>
+</html>

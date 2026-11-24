@@ -1,0 +1,17 @@
+# Copie ce fichier en « config/api_keys.yaml » (ignoré par git).
+# Il relie une API du catalogue (par son slug ou son id, visible dans fiche_api) à la variable
+# d'environnement qui contient TA clé (définie dans .env). Seules les API « open_with_account »
+# ont besoin d'une entrée. Les API « restricted » ne sont jamais appelées.
+#
+# Le nom de l'en-tête et le préfixe dépendent de chaque producteur : lis sa documentation.
+# Ci-dessous, des exemples de FORME uniquement (à vérifier avant usage, rien n'est garanti).
+#
+# api-melodi:
+#   header: "Authorization"
+#   prefix: "Bearer "
+#   env: "MA_CLE_INSEE"
+#
+# api-donnees-radar:
+#   header: "apikey"
+#   prefix: ""
+#   env: "MA_CLE_METEOFRANCE"
