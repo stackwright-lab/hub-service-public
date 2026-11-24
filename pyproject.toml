@@ -1,6 +1,6 @@
 [project]
 name = "hub-service-public"
-version = "1.0.0"
+version = "1.0.1"
 description = "Interroger les données publiques françaises (data.gouv.fr, ADEME, BAN) depuis Claude : index local, accès en direct, tableau de bord de santé"
 readme = "README.md"
 requires-python = ">=3.10"

@@ -54,14 +54,20 @@ def rechercher(
     limite: int = 10,
     decalage: int = 0,
 ) -> dict:
-    """Recherche plein texte dans tout le catalogue data.gouv.fr (insensible aux accents).
+    """Recherche plein texte dans l'index local du catalogue data.gouv.fr (insensible aux accents, sans réseau).
+
+    Quand l'utiliser : pour obtenir une liste d'identifiants à examiner soi-même (jeux, API, organisations,
+    réutilisations, discussions), avec des filtres précis. Pour une question en langage naturel dont on veut
+    directement des extraits de données, préférer `repondre`, qui appelle cette recherche puis lit les fichiers.
 
     type : jeux_de_donnees | api | organisations | reutilisations | discussions | tout.
     producteur : partie du nom de l'organisation (ex. « Insee », « ADEME »).
     format : format de fichier (csv, json, xlsx, geojson…), jeux de données seulement.
     interrogeable : true pour ne garder que les jeux dont un fichier est lisible via `interroger_fichier`.
     acces : pour les API, open | open_with_account | restricted.
-    Renvoie des résultats classés par pertinence ; une requête vide liste les plus consultés.
+    Renvoie un dictionnaire {type: [résultats]} classés par pertinence (identifiant, slug, titre, producteur,
+    dernière mise à jour…) ; une requête vide liste les plus consultés. Les identifiants se passent ensuite à `fiche_jeu_de_donnees`,
+    `fiche_api` ou `fiche_organisation`.
     """
     conn = _conn()
     if conn is None:
@@ -117,8 +123,10 @@ def fiche_api(identifiant: str) -> dict:
 
 @mcp.tool(annotations=_LOCAL)
 def fiche_organisation(identifiant: str) -> dict:
-    """Fiche d'une organisation productrice (identifiant ou slug) avec ses jeux de données les plus
-    consultés et ses API."""
+    """Fiche d'une organisation productrice (identifiant ou slug, tel que renvoyé par `rechercher` avec
+    type=organisations ou par le champ producteur d'une fiche), lue dans l'index local : nom, sigle, description,
+    page data.gouv.fr, nombre de jeux et d'API, ses jeux de données les plus consultés et ses API.
+    Renvoie {erreur} si l'organisation est inconnue de l'index."""
     conn = _conn()
     if conn is None:
         return _NO_INDEX
@@ -130,11 +138,12 @@ def fiche_organisation(identifiant: str) -> dict:
 
 @mcp.tool(annotations=_LIVE)
 def repondre(question: str) -> dict:
-    """Point d'entrée pour toute question libre sur l'information publique française : lance l'enquête complète en un
-    appel (reconnaissance du DPE d'une adresse, sinon recherche dans le catalogue, puis lecture en direct des premières
+    """Point d'entrée pour une question libre en français sur l'information publique (« DPE du 10 rue de Rivoli à
+    Paris », « qualité de l'air à Lyon ») : lance l'enquête complète en un appel, avec réseau (reconnaissance du DPE d'une adresse, sinon recherche dans le catalogue, puis lecture en direct des premières
     lignes des fichiers interrogeables, filtrées sur le lieu cité). Renvoie des pistes sourcées (jeu, producteur, fichier,
     colonnes, lignes) à vérifier, jamais une conclusion : à toi de rédiger la réponse en citant jeu et producteur, et
-    d'approfondir avec `interroger_fichier` ou `appeler_api` si les pistes sont insuffisantes."""
+    d'approfondir avec `interroger_fichier` ou `appeler_api` si les pistes sont insuffisantes.
+    Ne pas l'utiliser pour lister ou filtrer le catalogue : `rechercher` est plus rapide et plus précis pour cela."""
     conn = _conn()
     if conn is None:
         return _NO_INDEX
@@ -240,7 +249,10 @@ def appeler_api(
 
 @mcp.tool(annotations=_LOCAL)
 def etat_du_hub() -> dict:
-    """Taille et fraîcheur de l'index local, dernière synchronisation, résumé de santé des API testées."""
+    """Diagnostic rapide du hub lui-même, sans réseau : l'index local existe-t-il, combien d'éléments contient-il,
+    de quand date la dernière synchronisation. À appeler en premier si un autre outil renvoie une erreur d'index.
+    Pour savoir si les services en ligne répondent, utiliser `disponibilite_sources` ; pour juger la qualité des
+    données publiées par les producteurs, utiliser `sante_des_donnees`."""
     if not db.exists():
         return _NO_INDEX
     conn = db.connect(readonly=True)
@@ -298,9 +310,12 @@ def synchroniser_index() -> dict:
 
 @mcp.tool(annotations=_LOCAL)
 def sante_des_donnees() -> dict:
-    """Indicateurs de santé du catalogue calculés sur l'index local : fraîcheur des jeux par périodicité, complétude
-    des métadonnées, formats, documentation et accès des API, producteurs et jeux en retard, réutilisations,
-    discussions sans réponse. Aucun appel réseau."""
+    """Qualité des données publiées sur data.gouv.fr, calculée sur l'index local sans réseau : jeux en retard
+    sur leur fréquence de mise à jour annoncée, producteurs les plus en retard, complétude des métadonnées, formats,
+    documentation et accès des API, réutilisations, discussions sans réponse.
+    Quand l'utiliser : pour juger si un jeu ou un producteur est fiable et à jour, ou pour un bilan du catalogue.
+    Ne dit rien de la disponibilité des services en ligne (voir `disponibilite_sources`) ni de l'état du hub
+    (voir `etat_du_hub`)."""
     if not db.exists():
         return _NO_INDEX
     from . import dashboard
@@ -315,9 +330,11 @@ def sante_des_donnees() -> dict:
 
 @mcp.tool(annotations=_LIVE)
 def disponibilite_sources() -> dict:
-    """Disponibilité, en direct, des sources que le hub interroge (API data.gouv.fr, API tabulaire, MCP officiel,
-    ADEME, géocodage...) avec code HTTP et latence ; plus la fraîcheur de l'index local par type de contenu et le
-    dernier bilan de joignabilité des API du catalogue. Appel en lecture seule, environ 1 à 15 secondes."""
+    """Teste en direct si les services en ligne utilisés par le hub répondent (API data.gouv.fr, API tabulaire, MCP
+    officiel, ADEME, géocodage), avec catégorie, code HTTP et latence ; ajoute la date de dernière synchronisation
+    par type de contenu, le dernier bilan de joignabilité des API du catalogue et l'avancement de `synchroniser_index`.
+    Quand l'utiliser : quand un outil en direct échoue, avant une série d'appels, ou pour suivre une synchronisation.
+    Lecture seule, environ 1 à 15 secondes. La qualité des données elles-mêmes relève de `sante_des_donnees`."""
     from datetime import datetime, timezone
 
     from . import services

@@ -1,5 +1,10 @@
 # Historique des versions
 
+## 1.0.1 (24 novembre 2026)
+
+- Descriptions des outils MCP précisées pour que les assistants choisissent le bon outil : quand utiliser `repondre` plutôt que `rechercher`, et ce qui distingue `etat_du_hub` (état du hub), `disponibilite_sources` (services en ligne) et `sante_des_donnees` (qualité des données publiées).
+- Ajout de `glama.json`, de Dependabot et de l'analyse de code CodeQL.
+
 ## 1.0.0 (24 novembre 2026)
 
 Première version publique.
